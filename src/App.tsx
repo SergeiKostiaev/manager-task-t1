@@ -1,7 +1,5 @@
 import {type FC, useState} from 'react';
-import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
-import { ConfigProvider } from 'antd';
-import ruRU from 'antd/lib/locale/ru_RU';
+import {Routes, Route, BrowserRouter} from 'react-router-dom';
 import TaskList from './components/TaskList/TaskList';
 import TaskDetails from './components/TaskDetails/TaskDetails';
 import type { Task } from './types/taskTypes';
