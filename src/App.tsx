@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {type FC, useState} from 'react';
+import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import ruRU from 'antd/lib/locale/ru_RU';
 import TaskList from './components/TaskList/TaskList';
 import TaskDetails from './components/TaskDetails/TaskDetails';
 import type { Task } from './types/taskTypes';
 
-const App: React.FC = () => {
+const App: FC = () => {
     const [tasks, setTasks] = useState<Task[]>([
         {
             id: 1,
@@ -33,17 +33,15 @@ const App: React.FC = () => {
     };
 
     return (
-        <ConfigProvider locale={ruRU}>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<TaskList tasks={tasks} key={tasks.length}/>} />
-                    <Route
-                        path="/task/:id"
-                        element={<TaskDetails tasks={tasks} onUpdate={handleTaskUpdate} />}
-                    />
-                </Routes>
-            </Router>
-        </ConfigProvider>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<TaskList tasks={tasks} key={tasks.length}/>} />
+                <Route
+                    path="/task/:id"
+                    element={<TaskDetails tasks={tasks} onUpdate={handleTaskUpdate} />}
+                />
+            </Routes>
+        </BrowserRouter>
     );
 };
 
