@@ -27,14 +27,16 @@ const App: React.FC = () => {
     ]);
 
     const handleTaskUpdate = (updatedTask: Task) => {
-        setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task));
+        setTasks(prevTasks => prevTasks.map(task =>
+            task.id === updatedTask.id ? { ...updatedTask } : task
+        ));
     };
 
     return (
         <ConfigProvider locale={ruRU}>
             <Router>
                 <Routes>
-                    <Route path="/" element={<TaskList tasks={tasks} />} />
+                    <Route path="/" element={<TaskList tasks={tasks} key={tasks.length}/>} />
                     <Route
                         path="/task/:id"
                         element={<TaskDetails tasks={tasks} onUpdate={handleTaskUpdate} />}
