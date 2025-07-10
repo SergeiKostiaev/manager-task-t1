@@ -10,21 +10,21 @@
 - Редактировать детали задач (название, описание, категорию, статус и приоритет)
 
 
-## <img src="img_1.png" width="40" alt="Основные возможности"> Основные возможности
+## <img src="src/assets/img_1.png" width="40" alt="Основные возможности"> Основные возможности
 
 - Адаптивный интерфейс
 - Создание и редактирование задач
 - Визуальное отображение статусов задач
 - Быстрая навигация между экранами
 
-## <img src="img_2.png" width="40"> Технологии
+## <img src="src/assets/img_2.png" width="40"> Технологии
 - React 18
 - TypeScript
 - Ant Design (UI компоненты)
 - React Router v6 (навигация)
 - CSS Modules (стилизация)
 
-## <img src="img_3.png" width="40"> Установка
+## <img src="src/assets/img_3.png" width="40"> Установка
 ```bash
 git clone https://github.com/SergeiKostiaev/manager-task-t1.git
 cd task-manager
