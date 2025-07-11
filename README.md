@@ -20,7 +20,7 @@
 - Быстрая навигация между экранами
 
 ## <img src="src/assets/img_2.png" width="40"> Технологии
-- React 18
+- React + Vite
 - TypeScript
 - Ant Design (UI компоненты)
 - React Router v6 (навигация)
