@@ -29,6 +29,5 @@
 ## <img src="src/assets/img_3.png" width="40"> Установка
 ```bash
 git clone https://github.com/SergeiKostiaev/manager-task-t1.git
-cd task-manager
 npm install
 npm run dev
