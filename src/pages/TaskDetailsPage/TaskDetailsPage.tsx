@@ -11,8 +11,35 @@ export function TaskDetailsPage() {
     const navigate = useNavigate()
 
     const handleUpdate = (updatedTask: Task) => {
-        dispatch(updateTask(updatedTask))
+        const taskWithDate = {
+            ...updatedTask,
+            updatedAt: new Date().toISOString()
+        }
+        dispatch(updateTask(taskWithDate))
         navigate(-1)
+    }
+
+    const formatDate = (dateString: string) => {
+        try {
+            const date = new Date(dateString)
+            return isNaN(date.getTime())
+                ? 'Дата не указана'
+                : date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+        } catch {
+            return 'Некорректная дата'
+        }
+    }
+
+    const taskWithFormattedDate = {
+        ...task,
+        createdAt: formatDate(task.createdAt),
+        updatedAt: task.updatedAt ? formatDate(task.updatedAt) : 'Не обновлялась'
     }
 
     return (
@@ -24,7 +51,7 @@ export function TaskDetailsPage() {
             destroyOnHidden
         >
             <TaskForm
-                task={task}
+                task={taskWithFormattedDate}
                 onCancel={() => navigate(-1)}
                 onUpdate={handleUpdate}
             />

@@ -2,6 +2,7 @@ import { Button, Form, Input, Select } from 'antd'
 import { useAppDispatch } from '@shared/lib/hooks/useAppDispatch'
 import { addTask, updateTask } from '@entities/task/model/taskSlice'
 import type { Task } from '@entities/task/model/types'
+import { useEffect } from 'react'
 
 const taskCategories = [
     { value: 'Bug', label: 'Bug' },
@@ -23,7 +24,17 @@ const taskPriorities = [
     { value: 'High', label: 'High' }
 ]
 
-export function TaskForm({task, onCancel}: {
+const safeDate = (date?: string | Date | null) => {
+    if (!date) return new Date()
+    try {
+        const d = new Date(date)
+        return isNaN(d.getTime()) ? new Date() : d
+    } catch {
+        return new Date()
+    }
+}
+
+export function TaskForm({ task, onCancel, onUpdate }: {
     task?: Task,
     onCancel: () => void,
     onUpdate?: (updatedTask: Task) => void
@@ -31,21 +42,43 @@ export function TaskForm({task, onCancel}: {
     const [form] = Form.useForm()
     const dispatch = useAppDispatch()
 
-    const handleSubmit = (values: Omit<Task, 'id'>) => {
+    useEffect(() => {
         if (task) {
-            dispatch(updateTask({ ...values, id: task.id }));
-        } else {
-            dispatch(addTask({
-                ...values,
-                id: Date.now(),
-                createdAt: new Date().toISOString()
-            }));
+            form.setFieldsValue({
+                ...task,
+                createdAt: safeDate(task.createdAt).toISOString()
+            })
         }
-        onCancel();
-    };
+    }, [task, form])
+
+    const handleSubmit = (values: Omit<Task, 'id'>) => {
+        try {
+            const now = new Date().toISOString()
+            const taskData = {
+                ...values,
+                createdAt: values.createdAt || now,
+                updatedAt: now
+            }
+
+            if (task) {
+                const updatedTask = { ...taskData, id: task.id }
+                dispatch(updateTask(updatedTask))
+                onUpdate?.(updatedTask)
+            } else {
+                dispatch(addTask({
+                    ...taskData,
+                    id: Date.now(),
+                    createdAt: now
+                }))
+            }
+            onCancel()
+        } catch (error) {
+            console.error('Error submitting task:', error)
+        }
+    }
 
     return (
-        <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={task}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
             <Form.Item
                 name="title"
                 label="Заголовок"
@@ -80,6 +113,10 @@ export function TaskForm({task, onCancel}: {
                 rules={[{ required: true, message: 'Выберите приоритет' }]}
             >
                 <Select options={taskPriorities} />
+            </Form.Item>
+
+            <Form.Item name="createdAt" hidden>
+                <Input type="hidden" />
             </Form.Item>
 
             <Form.Item>
