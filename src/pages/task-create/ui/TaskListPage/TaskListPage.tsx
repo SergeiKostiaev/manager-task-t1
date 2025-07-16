@@ -4,13 +4,15 @@ import { PlusOutlined } from '@ant-design/icons';
 import { TaskList } from '@widgets/task-list/ui/TaskList';
 import { TaskForm } from '@features/task-manager/ui/TaskForm';
 
-export function TaskListPage() {
+import styles from './TaskListPage.module.css'
+
+export default function TaskListPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
-        <div style={{ padding: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                <h1>Менеджер задач</h1>
+        <div className={styles.container}>
+            <div className={styles.container_wrap}>
+                <h1>Task Manager</h1>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}

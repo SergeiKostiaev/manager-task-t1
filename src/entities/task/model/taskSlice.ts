@@ -6,7 +6,48 @@ interface TasksState {
 }
 
 const initialState: TasksState = {
-    tasks: [],
+    tasks: [
+        {
+            id: 1,
+            title: 'Исправить ошибку авторизации',
+            description: 'При нажатии на авторизоваться, не пускает в систему',
+            category: 'Bug',
+            status: 'To Do',
+            priority: 'High',
+            createdAt: '2025-02-20T09:00:00Z',
+            updatedAt: '2025-02-20T09:00:00Z'
+        },
+        {
+            id: 2,
+            title: 'Внести правки по макету Figma',
+            description: 'Доступ к макету попросить у дизайнера',
+            category: 'Refactor',
+            status: 'To Do',
+            priority: 'Low',
+            createdAt: '2025-02-19T14:30:00Z',
+            updatedAt: '2025-02-19T14:30:00Z'
+        },
+        {
+            id: 3,
+            title: 'Реализовать пагинацию на странице задач',
+            description: 'Добавить пагинацию по 10 задач на страницу',
+            category: 'Feature',
+            status: 'In Progress',
+            priority: 'Medium',
+            createdAt: '2025-02-18T11:15:00Z',
+            updatedAt: '2025-02-19T16:45:00Z'
+        },
+        {
+            id: 4,
+            title: 'Написать тесты для модуля авторизации',
+            description: 'Покрыть тестами основные сценарии входа',
+            category: 'Test',
+            status: 'Done',
+            priority: 'Medium',
+            createdAt: '2025-02-15T10:00:00Z',
+            updatedAt: '2025-02-16T18:30:00Z'
+        }
+    ],
 };
 
 export const tasksSlice = createSlice({

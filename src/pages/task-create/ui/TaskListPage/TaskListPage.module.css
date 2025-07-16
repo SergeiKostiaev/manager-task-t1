@@ -2,3 +2,13 @@
     margin-bottom: 16px;
     align-self: flex-end;
 }
+
+.container {
+    padding: 24px;
+}
+
+.container_wrap {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px
+}
