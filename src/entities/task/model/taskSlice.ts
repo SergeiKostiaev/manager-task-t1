@@ -5,8 +5,23 @@ interface TasksState {
     tasks: Task[];
 }
 
+const loadTasksFromStorage = (): Task[] => {
+    try {
+        const saved = localStorage.getItem('tasks');
+        return saved ? JSON.parse(saved) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveTasksToStorage = (tasks: Task[]) => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+};
+
 const initialState: TasksState = {
-    tasks: [
+    tasks: loadTasksFromStorage().length > 0
+        ? loadTasksFromStorage()
+        : [
         {
             id: 1,
             title: 'Исправить ошибку авторизации',
@@ -56,18 +71,30 @@ export const tasksSlice = createSlice({
     reducers: {
         addTask: (state, action: PayloadAction<Task>) => {
             state.tasks.unshift(action.payload);
+            saveTasksToStorage(state.tasks);
         },
         updateTask: (state, action: PayloadAction<Task>) => {
             const index = state.tasks.findIndex(t => t.id === action.payload.id);
-            if (index !== -1) state.tasks[index] = action.payload;
+            if (index !== -1) {
+                state.tasks[index] = action.payload;
+                saveTasksToStorage(state.tasks);
+            }
         },
         deleteTask: (state, action: PayloadAction<number>) => {
             state.tasks = state.tasks.filter(t => t.id !== action.payload);
+            saveTasksToStorage(state.tasks);
+        },
+        loadTasks: (state) => {
+            const savedTasks = loadTasksFromStorage();
+            if (savedTasks.length > 0) {
+                state.tasks = savedTasks;
+            }
         }
     }
 });
 
+
 export const selectAllTasks = (state: { tasks: TasksState }) => state.tasks.tasks;
 
-export const { addTask, updateTask, deleteTask } = tasksSlice.actions;
+export const { addTask, updateTask, deleteTask, loadTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;
