@@ -1,17 +1,35 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { TaskApi } from '@shared/lib/api/taskApi/taskApi';
 import type { Task } from '@entities/task/model/types';
 
+interface FiltersState {
+    searchText: string;
+    date: string | null;
+    category: string | null;
+    status: string | null;
+    priority: string | null;
+}
+
 interface TasksState {
     tasks: Task[];
+    filteredTasks: Task[];
     loading: boolean;
     error: string | null;
+    filters: FiltersState;
 }
 
 const initialState: TasksState = {
     tasks: [],
+    filteredTasks: [],
     loading: false,
-    error: null
+    error: null,
+    filters: {
+        searchText: '',
+        date: null,
+        category: null,
+        status: null,
+        priority: null
+    }
 };
 
 export const fetchTasks = createAsyncThunk(
@@ -45,7 +63,6 @@ export const updateTask = createAsyncThunk(
                 ...taskData,
                 createdAt: currentTask.createdAt
             };
-
             return await TaskApi.updateTask(id, dataToUpdate);
         } catch (error) {
             return rejectWithValue((error as Error).message);
@@ -65,10 +82,60 @@ export const deleteTask = createAsyncThunk(
     }
 );
 
+const applyAllFilters = (tasks: Task[], filters: FiltersState): Task[] => {
+    let result = [...tasks];
+
+    // Поиск по названию
+    if (filters.searchText) {
+        const searchText = filters.searchText.toLowerCase();
+        result = result.filter(task =>
+            task.title.toLowerCase().includes(searchText)
+        );
+    }
+
+    // Фильтр по дате
+    if (filters.date) {
+        const filterDate = new Date(filters.date).toISOString().split('T')[0];
+        result = result.filter(task =>
+            new Date(task.createdAt).toISOString().split('T')[0] === filterDate
+        );
+    }
+
+    // Фильтр по категории
+    if (filters.category) {
+        result = result.filter(task => task.category === filters.category);
+    }
+
+    // Фильтр по статусу
+    if (filters.status) {
+        result = result.filter(task => task.status === filters.status);
+    }
+
+    // Фильтр по приоритету
+    if (filters.priority) {
+        result = result.filter(task => task.priority === filters.priority);
+    }
+
+    return result;
+};
+
 const tasksSlice = createSlice({
     name: 'tasks',
     initialState,
-    reducers: {},
+    reducers: {
+        applyFilters: (state, action: PayloadAction<Partial<FiltersState>>) => {
+            const newFilters = {
+                ...state.filters,
+                ...action.payload
+            };
+            state.filters = newFilters;
+            state.filteredTasks = applyAllFilters(state.tasks, newFilters);
+        },
+        resetFilters: (state) => {
+            state.filters = initialState.filters;
+            state.filteredTasks = [...state.tasks];
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchTasks.pending, (state) => {
@@ -78,6 +145,7 @@ const tasksSlice = createSlice({
             .addCase(fetchTasks.fulfilled, (state, action) => {
                 state.loading = false;
                 state.tasks = action.payload;
+                state.filteredTasks = applyAllFilters(action.payload, state.filters);
             })
             .addCase(fetchTasks.rejected, (state, action) => {
                 state.loading = false;
@@ -90,6 +158,7 @@ const tasksSlice = createSlice({
             .addCase(createTask.fulfilled, (state, action) => {
                 state.loading = false;
                 state.tasks.unshift(action.payload);
+                state.filteredTasks = applyAllFilters(state.tasks, state.filters);
             })
             .addCase(createTask.rejected, (state, action) => {
                 state.loading = false;
@@ -101,10 +170,10 @@ const tasksSlice = createSlice({
             })
             .addCase(updateTask.fulfilled, (state, action) => {
                 state.loading = false;
-                const index = state.tasks.findIndex(t => t.id === action.payload.id);
-                if (index !== -1) {
-                    state.tasks[index] = action.payload;
-                }
+                state.tasks = state.tasks.map(task =>
+                    task.id === action.payload.id ? action.payload : task
+                );
+                state.filteredTasks = applyAllFilters(state.tasks, state.filters);
             })
             .addCase(updateTask.rejected, (state, action) => {
                 state.loading = false;
@@ -112,12 +181,18 @@ const tasksSlice = createSlice({
             })
             .addCase(deleteTask.fulfilled, (state, action) => {
                 state.tasks = state.tasks.filter(t => t.id !== action.payload);
+                state.filteredTasks = applyAllFilters(state.tasks, state.filters);
             });
     }
 });
 
+export const { applyFilters, resetFilters } = tasksSlice.actions;
+
 export const selectAllTasks = (state: { tasks: TasksState }) => state.tasks.tasks;
+export const selectFilteredTasks = (state: { tasks: TasksState }) =>
+    state.tasks.filteredTasks;
 export const selectTasksLoading = (state: { tasks: TasksState }) => state.tasks.loading;
 export const selectTasksError = (state: { tasks: TasksState }) => state.tasks.error;
+export const selectCurrentFilters = (state: { tasks: TasksState }) => state.tasks.filters;
 
 export default tasksSlice.reducer;

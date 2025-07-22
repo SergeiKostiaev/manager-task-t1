@@ -55,4 +55,44 @@ export class TaskApi {
             throw new Error('Failed to delete task');
         }
     }
+    static async searchTasksByTitle(title: string): Promise<Task[]> {
+        const response = await fetch(`${API_URL}?title=${encodeURIComponent(title)}`);
+        if (!response.ok) {
+            throw new Error('Failed to search tasks');
+        }
+        return response.json();
+    }
+
+    static async filterTasksByDate(date: Date): Promise<Task[]> {
+        const dateStr = date.toISOString().split('T')[0];
+        const response = await fetch(`${API_URL}?date=${dateStr}`);
+        if (!response.ok) {
+            throw new Error('Failed to filter tasks by date');
+        }
+        return response.json();
+    }
+
+    static async filterTasksByCategory(category: string): Promise<Task[]> {
+        const response = await fetch(`${API_URL}?category=${category}`);
+        if (!response.ok) {
+            throw new Error('Failed to filter tasks by category');
+        }
+        return response.json();
+    }
+
+    static async filterTasksByStatus(status: string): Promise<Task[]> {
+        const response = await fetch(`${API_URL}?status=${status}`);
+        if (!response.ok) {
+            throw new Error('Failed to filter tasks by status');
+        }
+        return response.json();
+    }
+
+    static async filterTasksByPriority(priority: string): Promise<Task[]> {
+        const response = await fetch(`${API_URL}?priority=${priority}`);
+        if (!response.ok) {
+            throw new Error('Failed to filter tasks by priority');
+        }
+        return response.json();
+    }
 }
