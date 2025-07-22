@@ -1,14 +1,29 @@
-import { useState } from 'react';
-import { Button, Modal } from 'antd';
+import { useState, useEffect } from 'react';
+import { Button, Modal, Spin, Alert } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { TaskList } from '@widgets/task-list/ui/TaskList';
 import { TaskForm } from '@features/task-manager/ui/TaskForm';
-import { useAppSelector } from '@shared/lib/hooks';
-import { selectAllTasks } from '@entities/task/model/taskSlice';
+import { useAppDispatch, useAppSelector } from '@shared/lib/hooks';
+import { selectAllTasks, selectTasksLoading, selectTasksError, fetchTasks } from '@entities/task/model/taskSlice';
 
 export function TaskListPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const dispatch = useAppDispatch();
     const tasks = useAppSelector(selectAllTasks);
+    const loading = useAppSelector(selectTasksLoading);
+    const error = useAppSelector(selectTasksError);
+
+    useEffect(() => {
+        dispatch(fetchTasks());
+    }, [dispatch]);
+
+    if (loading && !tasks.length) {
+        return <Spin size="large" />;
+    }
+
+    if (error) {
+        return <Alert message={error} type="error" />;
+    }
 
     return (
         <div style={{ padding: 24 }}>

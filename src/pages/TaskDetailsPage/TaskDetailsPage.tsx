@@ -1,60 +1,55 @@
-import { Modal } from 'antd'
-import { useLoaderData, useNavigate } from 'react-router-dom'
-import { TaskForm } from '@features/task-manager/ui/TaskForm'
-import { useAppDispatch } from '@shared/lib/hooks/useAppDispatch'
-import { updateTask } from '@entities/task/model/taskSlice'
-import type { Task } from '@entities/task/model/types'
+import { Modal, message } from 'antd';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { TaskForm } from '@features/task-manager/ui/TaskForm';
+import { useAppDispatch } from '@shared/lib/hooks/useAppDispatch';
+import { updateTask } from '@entities/task/model/taskSlice';
+import type { Task } from '@entities/task/model/types';
+
+interface LoaderData {
+    task: Task;
+}
 
 export function TaskDetailsPage() {
-    const { task } = useLoaderData() as { task: Task }
-    const dispatch = useAppDispatch()
-    const navigate = useNavigate()
+    const { task } = useLoaderData() as LoaderData;
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage();
 
-    const handleUpdate = (updatedTask: Task) => {
-        const taskWithDate = {
-            ...updatedTask,
-            updatedAt: new Date().toISOString()
-        }
-        dispatch(updateTask(taskWithDate))
-        navigate(-1)
-    }
-
-    const formatDate = (dateString: string) => {
+    const handleUpdate = async (updatedTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
         try {
-            const date = new Date(dateString)
-            return isNaN(date.getTime())
-                ? 'Дата не указана'
-                : date.toLocaleDateString('ru-RU', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })
-        } catch {
-            return 'Некорректная дата'
-        }
-    }
+            const resultAction = await dispatch(updateTask({
+                ...updatedTask,
+                id: task.id,
+                createdAt: task.createdAt, // Сохраняем оригинальную дату создания
+                updatedAt: new Date().toISOString()
+            }));
 
-    const taskWithFormattedDate = {
-        ...task,
-        createdAt: formatDate(task.createdAt),
-        updatedAt: task.updatedAt ? formatDate(task.updatedAt) : 'Не обновлялась'
-    }
+            if (updateTask.fulfilled.match(resultAction)) {
+                messageApi.success('Задача успешно обновлена');
+                navigate(-1);
+            }
+        } catch (error) {
+            messageApi.error('Ошибка при обновлении задачи');
+            console.error('Failed to update task:', error);
+        }
+    };
 
     return (
-        <Modal
-            open={true}
-            title="Редактирование задачи"
-            onCancel={() => navigate(-1)}
-            footer={null}
-            destroyOnHidden
-        >
-            <TaskForm
-                task={taskWithFormattedDate}
+        <>
+            {contextHolder}
+            <Modal
+                open={true}
+                title="Редактирование задачи"
                 onCancel={() => navigate(-1)}
-                onUpdate={handleUpdate}
-            />
-        </Modal>
-    )
+                footer={null}
+                destroyOnHidden
+            >
+                <TaskForm
+                    task={task}
+                    onCancel={() => navigate(-1)}
+                    onUpdate={handleUpdate}
+                />
+            </Modal>
+        </>
+    );
 }
